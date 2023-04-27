@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(12, GPIO.OUT)
+GPIO.setup(15, GPIO.IN)
+GPIO.setup(16, GPIO.IN)
 import time
 import Adafruit_MCP3008
 from Adafruit_GPIO import SPI
@@ -36,7 +38,7 @@ def main():
     low_heat_thresh = 62
     hi_heat_thresh = 45
 
-    output = ""
+    output2 = ""
 
     GPIO.output(output, 1)
 
@@ -89,9 +91,9 @@ def main():
 
         receive = "destination"
         sender = "send"
-        output = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)# + " " + str(wind)
-        send(receive, sender, output)
-        output = ""
+        output2 = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)# + " " + str(wind)
+        send(receive, sender, output2)
+        output2 = ""
 
 
         time.sleep(0.5)
