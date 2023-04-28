@@ -6,7 +6,7 @@ Establish a socket connection -> send a short message -> get a message back -> t
 use python "input->" function, enter a line of a few letters, such as "abcd"
 """
 import socket
-HOST = '172.20.10.7'
+HOST = '10.0.2.15'
 PORT =  2000
 def main():
     # TODO: Create a socket and connect it to the server at the designated IP and port
