@@ -1,93 +1,56 @@
-import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(12, GPIO.OUT)
-GPIO.setup(15, GPIO.IN)
-GPIO.setup(16, GPIO.IN)
+import grovepi
 import time
-import Adafruit_MCP3008
-from Adafruit_GPIO import SPI
-#import socket
+import sys
+import threading
+from grove_rgb_lcd import *
 
-HOST = '172.20.10.3'
-PORT = 8901
+# set I2C to use the hardware bus
+grovepi.set_bus("RPI_1")
 
-def main():
-    output = 11
-    SPI_PORT   = 0
-    SPI_DEVICE = 0
-    mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
-    GPIO.setup(output, GPIO.OUT, initial=GPIO.LOW)
+# Connect the Grove Ultrasonic Ranger to digital port D4
+# SIG,NC,VCC,GND
+ultrasonic_ranger = 4
 
-    temperature = 0
-    rotary = 0
-    button = 0
+lock = threading.Lock()
 
-    state = 0
-    low_ac_thresh = 78
-    hi_ac_thresh = 95
-    low_heat_thresh = 62
-    hi_heat_thresh = 45
+# Connect the Grove Rotary Angle Sensor to analog port A0
+# SIG,NC,VCC,GND
+potentiometer = 0
 
-    output2 = ""
+LCD = 1
 
-    GPIO.output(output, 1)
+grovepi.pinMode(potentiometer,"INPUT")
+grovepi.pinMode(LCD, "OUTPUT")
 
 
-    while 1: 
-        rotary = mcp.read_adc(0)
-        button = GPIO.input(16)
-        print("rotary: ")
-        print(rotary)
-        print("button: ")
-        print(button)
+time.sleep(1)
 
-        if button:
-            if (state == 3):
-                state = 0
-            else :
-                state = state + 1
+set_val = 0
+dist = 0
+string1 = ""
+string2 = ""
 
-        if rotary:
-            if (state == 0):
-                #update_hi_heat_thresh
-                print("0")
-                print(hi_heat_thresh)
-            elif (state == 1):
-                #update_low_heat_thresh
-                print("1")
-                print(low_heat_thresh)
-            elif (state == 2):
-                #update_low_ac_thresh
-                print("2")
-                print(low_ac_thresh)
-            else :
-                #update_hi_ac_thresh
-                print("3")
-                print(hi_ac_thresh)
-        
+while True:
+    try:
+        dist = grovepi.ultrasonicRead(ultrasonic_ranger)
+        set_val = grovepi.analogRead(potentiometer)
 
-        
-        temperature = GPIO.input(15)
-        print("temperature: ")
-        print(temperature)
-
-        #output2 = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)
-        
-        #with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-         #   s.connect((HOST, PORT))
-
-         #   inp = input(output2)
-         #   arr = bytes(inp, 'utf-8')
-         #   s.sendall(arr)
-
-            #data = s.recv(1024)
-            #print(f"{data!r}")
-       # pass
-
-        #output2 = ""
-
-
-        time.sleep(0.5)
-
-if __name__ == '__main__':
-    main()
+    except Exception as e:
+        print ("Error:{}".format(e))
+    
+    if (dist > set_val):
+        with lock:
+            setRGB(0,255,0)
+        string1 = str(set_val) + "cm" + "\n"
+        string2 = str(dist) + "cm"
+        with lock:
+            setText_norefresh(string1 + string2)
+    else:
+        with lock:
+            setRGB(255,0,0)
+        string1 = str(set_val) + "cm OBJ PRES" + "\n"
+        string2 = str(dist) + "cm"
+        with lock:
+            setText_norefresh(string1 + string2)
+    
+    time.sleep(0.1) # don't overload the i2c bus
