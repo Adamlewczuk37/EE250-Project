@@ -1,56 +1,50 @@
 import grovepi
 import time
-import sys
-import threading
 from grove_rgb_lcd import *
+import math
+import socket
 
-# set I2C to use the hardware bus
-grovepi.set_bus("RPI_1")
+HOST = '172.20.10.2'
+PORT = 2000
 
-# Connect the Grove Ultrasonic Ranger to digital port D4
-# SIG,NC,VCC,GND
-ultrasonic_ranger = 4
+def main():
+    # set I2C to use the hardware bus
+    grovepi.set_bus("RPI_1")
 
-lock = threading.Lock()
+    tempsensor = 4
+    LCD = 5
+    potentiometer = 0
+    #fan = 1
 
-# Connect the Grove Rotary Angle Sensor to analog port A0
-# SIG,NC,VCC,GND
-potentiometer = 0
+    grovepi.pinMode(tempsensor,"INPUT")
+    grovepi.pinMode(potentiometer,"INPUT")
+    grovepi.pinMode(LCD,"OUTPUT")
+    #grovepi.pinMode(fan,"OUTPUT")
 
-LCD = 1
+    time.sleep(1)
 
-grovepi.pinMode(potentiometer,"INPUT")
-grovepi.pinMode(LCD, "OUTPUT")
+    with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
 
+        while True:
+            output = ""
+            [temperature,humidity] = grovepi.dht(tempsensor,0)  
+            if math.isnan(temperature) == False and math.isnan(humidity) == False:
+                output = str(temperature) + " " + str(humidity)
+            else:
+                output = "0" + " 0"
+            
+            
+            thresh = grovepi.analogRead(potentiometer)
+            while thresh > 1023:
+                thresh = grovepi.analogRead(potentiometer)
 
-time.sleep(1)
+            thresh = thresh / 10
+            output = output + " " + str(thresh)
+            arr = bytes(output, 'utf-8')
+            s.sendall(arr)            
+            time.sleep(1)
+    pass
 
-set_val = 0
-dist = 0
-string1 = ""
-string2 = ""
-
-while True:
-    try:
-        dist = grovepi.ultrasonicRead(ultrasonic_ranger)
-        set_val = grovepi.analogRead(potentiometer)
-
-    except Exception as e:
-        print ("Error:{}".format(e))
-    
-    if (dist > set_val):
-        with lock:
-            setRGB(0,255,0)
-        string1 = str(set_val) + "cm" + "\n"
-        string2 = str(dist) + "cm"
-        with lock:
-            setText_norefresh(string1 + string2)
-    else:
-        with lock:
-            setRGB(255,0,0)
-        string1 = str(set_val) + "cm OBJ PRES" + "\n"
-        string2 = str(dist) + "cm"
-        with lock:
-            setText_norefresh(string1 + string2)
-    
-    time.sleep(0.1) # don't overload the i2c bus
+if __name__ == '__main__':
+    main()
