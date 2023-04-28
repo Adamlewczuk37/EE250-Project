@@ -6,7 +6,7 @@ GPIO.setup(16, GPIO.IN)
 import time
 import Adafruit_MCP3008
 from Adafruit_GPIO import SPI
-import socket
+#import socket
 
 HOST = '172.20.10.3'
 PORT = 8901
@@ -19,7 +19,6 @@ def main():
     GPIO.setup(output, GPIO.OUT, initial=GPIO.LOW)
 
     temperature = 0
-    #wind = 0
     rotary = 0
     button = 0
 
@@ -35,11 +34,8 @@ def main():
 
 
     while 1: 
-        #except Exception as e:
-            #print ("Error:{}".format(e))
-
-        button = GPIO.input(15)
-        rotary = GPIO.input(16)
+        rotary = mcp.read_adc(0)
+        button = GPIO.input(16)
         print("rotary: ")
         print(rotary)
         print("button: ")
@@ -71,28 +67,24 @@ def main():
         
 
         
-        temperature = mcp.read_adc(0)
+        temperature = GPIO.input(15)
         print("temperature: ")
         print(temperature)
 
-        #wind = mcp.read_adc(1)
-        #print("wind: ")
-        #print(wind)
-
-        output2 = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)# + " " + str(wind)
+        #output2 = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)
         
-        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-            s.connect((HOST, PORT))
+        #with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
+         #   s.connect((HOST, PORT))
 
-            inp = input(output2)
-            arr = bytes(inp, 'utf-8')
-            s.sendall(arr)
+         #   inp = input(output2)
+         #   arr = bytes(inp, 'utf-8')
+         #   s.sendall(arr)
 
             #data = s.recv(1024)
             #print(f"{data!r}")
-        pass
+       # pass
 
-        output2 = ""
+        #output2 = ""
 
 
         time.sleep(0.5)
