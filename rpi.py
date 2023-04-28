@@ -6,19 +6,10 @@ GPIO.setup(16, GPIO.IN)
 import time
 import Adafruit_MCP3008
 from Adafruit_GPIO import SPI
-import requests
-import pprint
+import socket
 
-SERVER = 'http://localhost:5000'
-
-def send(recipient: str, sender: str, text: str) -> bool: 
-    output = {
-        'recipient': recipient,
-        'sender': sender,
-        'text': text,
-    }
-    response = requests.post(f'{SERVER}/input_receiver', json=output)
-    pprint.pprint(response.json())
+HOST = '172.20.10.3'
+PORT = 8901
 
 def main():
     output = 11
@@ -88,11 +79,19 @@ def main():
         #print("wind: ")
         #print(wind)
 
-
-        receive = "destination"
-        sender = "send"
         output2 = str(hi_heat_thresh) + " " + str(low_heat_thresh) + " " + str(low_ac_thresh) + " " + str(hi_ac_thresh) + " " + str(temperature)# + " " + str(wind)
-        send(receive, sender, output2)
+        
+        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
+            s.connect((HOST, PORT))
+
+            inp = input(output2)
+            arr = bytes(inp, 'utf-8')
+            s.sendall(arr)
+
+            #data = s.recv(1024)
+            #print(f"{data!r}")
+        pass
+
         output2 = ""
 
 
