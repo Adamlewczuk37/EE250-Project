@@ -1,7 +1,8 @@
-# echo-server.py
-
 import socket
 import math
+import pandas as pd
+import plotly.express as px
+import time
 
 HOST = "172.20.10.2"
 PORT = 2000
@@ -52,24 +53,41 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
             if temperature != 32.0:
                 length = len(temperature_arr)
-                if length < 10:
+                if length < 51:
                     temperature_arr.append(temperature)
                     humidity_arr.append(humidity)
                     index_arr.append(index)
-                elif temp == 0:
-                    #print graph...
-                    print(temperature_arr)
-                    print(humidity_arr)
-                    print(index_arr)
-                    temp = 1
+                elif (length == 51) and (temp == 0):
+                    temperature_arr.pop(0)
+                    humidity_arr.pop(0)
+                    index_arr.pop(0)
+                    double_arr = []
+                    double_arr.append(time_arr)
+                    double_arr.append(temperature_arr)
+                    double_arr.append(humidity_arr)
+                    double_arr.append(index_arr)
 
+                    a = pd.DataFrame(double_arr)
+                    df = a.transpose()
+                    df.columns = ['Time', 'Temperature', 'Humidity', 'Index']
+                    vals = ['Temperature', 'Humidity', 'Index']
+
+                    fig = px.line(df, x='Time', y=vals, title="Heat Index Computations")
+                    fig.update_yaxes(title_text="Temperature in F / % Humidity")
+                    fig.update_xaxes(title_text="Trial Number")
+                    fig.write_image("output.png")
+
+                    temp = 1
 
                 if index >= thresh:
                     sendback = "1"
                 else :
                     sendback = "0"
-                
                 #send back value for fan speed eventually...
-                #conn.sendall(sendback)
+                send = bytes(sendback, 'utf-8')
+                conn.sendall(send)
+
+                time.sleep(2)
+
             if not data:
                 break
