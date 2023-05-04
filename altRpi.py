@@ -2,10 +2,9 @@ import grovepi
 import time
 from grove_rgb_lcd import *
 import math
-import threading
 import socket
 
-HOST = '172.20.10.2'
+HOST = '172.20.10.7'
 PORT = 2000
 
 def main():
@@ -19,7 +18,6 @@ def main():
 	grovepi.pinMode(button, "INPUT")
 
 	textCommand(0x01)
-	lock = threading.Lock()
 
 	time.sleep(1)
 
@@ -46,8 +44,6 @@ def main():
 			arr = bytes(output, 'utf-8')
 			s.sendall(arr)
 
-			display = "Threshold: " + str(thresh)
-
 			if buttonState:
 				break
 			time.sleep(1)
@@ -56,13 +52,13 @@ def main():
 				break
 			data = str(data)
 			data = data.strip('\'b')
-			with lock:
-				if (data == "RED"):
-					setRGB(255,0,0)
-				else:
-					setRGB(0,0,255)
-				setText_norefresh(display)
-pass
+			if data == "RED":
+				setText(str(thresh))
+				setRGB(255,0,0)
+			else:
+                                setText(str(thresh))
+                                setRGB(0,0,255)
+	pass
 
 if __name__ == '__main__':
     main()
