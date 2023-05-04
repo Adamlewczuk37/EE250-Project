@@ -20,17 +20,32 @@ RH_list=[]
 H_index_list = []
 time_list = []
 
-def calc_H_Index(T, RH):
-	HI = -42.379 + 2.04901523*T + 10.14333127*RH - .22475541*T*RH - .00683783*T*T - .05481717*RH*RH + .00122874*T*T*RH + .00085282*T*RH*RH - .00000199*T*T*RH*RH
-	if T >= 80 and T <= 112 and RH < 13:
-		adjustment = ((13-RH)/4)*math.sqrt((17-abs(T-95))/17)
-		HI += adjustment
-	elif RH > 85 and T >= 80 and T <= 87:
-		adjustment = ((RH-85)/10) * ((87-T)/5)
-		HI -= adjustment
-	if HI < 80:
-		HI = 0.5 * (T+61+(T-68)*0.5 + RH*0.094)
-	return HI
+def calc_H_Index(temperature, relative_humidity):
+	# Constants in the formula
+	c1 = -42.379
+	c2 = 2.04901523
+	c3 = 10.14333127
+	c4 = -0.22475541
+	c5 = -0.00683783
+	c6 = -0.05481717
+	c7 = 0.00122874
+	c8 = 0.00085282
+	c9 = -0.00000199
+
+	hi = c1 + c2*temperature + c3*relative_humidity + c4*temperature*relative_humidity + c5*temperature**2 + c6*relative_humidity**2 + c7*temperature**2*relative_humidity + c8*temperature*relative_humidity**2 + c9*temperature**2*relative_humidity**2
+
+	if temperature >= 80 and temperature <= 112 and relative_humidity < 13:
+		adjustment = ((13 - relative_humidity)/4) * math.sqrt((17 - abs(temperature - 95))/17)
+		hi += adjustment
+	elif relative_humidity > 85 and temperature >= 80 and temperature <= 87:
+		adjustment = ((relative_humidity - 85)/10) * ((87 - temperature)/5)
+		hi -= adjustment
+
+	# Apply a final adjustment if the HI is less than 80
+	if hi < 80:
+		hi = 0.5 * (temperature + 61 + (temperature - 68)*0.5 + relative_humidity*0.094)
+
+	return hi
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 	s.bind((HOST, PORT))
