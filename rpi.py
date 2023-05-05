@@ -47,8 +47,6 @@ def main():
 			arr = bytes(output, 'utf-8')
 			s.sendall(arr)
 
-			display = "Threshold: " + str(thresh)
-
 			if buttonState:
 				break
 			time.sleep(1)
@@ -58,14 +56,19 @@ def main():
 			data = str(data)
 			data = data.strip('\'b')
 			arr = data.split()
+
+			disp = int(thresh)
+			x = float(arr[1])
+			index = int(x)
+			display = "Threshold: " + str(disp) + "\n" + "H_Index: " + str(index)
 			
 			if (arr[0] == "RED"):
 				setRGB(255,0,0)
 			else:
 				setRGB(0,0,255)
-			setText_norefresh(display)
+			setText(display)
 
-			mode = int(arr[1])
+			mode = int(arr[2])
 			grovepi.analogWrite(fan,mode)
 			
 	pass

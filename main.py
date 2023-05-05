@@ -70,6 +70,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			else:
 				output = "BLUE "
 			
+			output = output + str(H_index) + " "
+			
 			diff = H_index - threshold
 			if diff > 25:
 				output = output + "255"
