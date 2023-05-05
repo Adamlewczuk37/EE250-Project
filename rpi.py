@@ -13,13 +13,14 @@ def main():
 	potentiometer = 0
 	button = 3
 	buttonState = 0
+	fan = 5
 
 	grovepi.pinMode(tempsensor,"INPUT")
 	grovepi.pinMode(potentiometer,"INPUT")
 	grovepi.pinMode(button, "INPUT")
+	grovepi.pinMode(fan, "OUTPUT")
 
 	textCommand(0x01)
-	lock = threading.Lock()
 
 	time.sleep(1)
 
@@ -56,13 +57,20 @@ def main():
 				break
 			data = str(data)
 			data = data.strip('\'b')
-			with lock:
-				if (data == "RED"):
-					setRGB(255,0,0)
-				else:
-					setRGB(0,0,255)
-				setText_norefresh(display)
-pass
+			arr = data.split()
+			
+			if (arr[0] == "RED"):
+				setRGB(255,0,0)
+			else:
+				setRGB(0,0,255)
+			setText_norefresh(display)
+
+			mode = int(arr[1])
+			grovepi.analogWrite(fan,mode)
+			
+	pass
+	grovepi.analogWrite(fan,0)
+
 
 if __name__ == '__main__':
     main()

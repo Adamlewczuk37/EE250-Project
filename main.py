@@ -66,9 +66,23 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			if buttonState:
 				break
 			if H_index < threshold:
-				output = "RED"
+				output = "RED "
 			else:
-				output = "BLUE"
+				output = "BLUE "
+			
+			diff = H_index - threshold
+			if diff > 25:
+				output = output + "255"
+			elif diff > 20:
+				output = output + "128"
+			elif diff > 15:
+				output = output + "8"
+			elif diff > 10:
+				output = output + "5"
+			elif diff > 5:
+				output = output + "3"
+			else:
+				output = output + "0"
 
 			arr = bytes(output, 'utf-8')
 			conn.sendall(arr)
